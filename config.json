@@ -1,0 +1,8 @@
+{
+	"token": "MTIyMzI3NTc0MTY5Mzc0MzIxNA.GnRi_L.ixGeDmW-S1lR1xzijx7imXJ5y8vSHF7SWEL598",
+    "clientID": "1223275741693743214",
+	"guildId": "1215681162077544548",
+	"clientSecret": "4jErN-2UHU40aLWiWDF5JEtOcjETS9Uz",
+	"callbackURL": "http://10.31.36.185:3000/auth/discord/callback"
+}
+

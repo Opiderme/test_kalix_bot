@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Server Details - <%= guild.name %></title>
+</head>
+<body>
+    <h1><%= guild.name %></h1>
+    <h2>Channels</h2>
+    <ul>
+        <% channels.forEach(channel => { %>
+            <li><%= channel.name %></li>
+        <% }) %>
+    </ul>
+    <h2>Roles</h2>
+    <ul>
+        <% roles.forEach(role => { %>
+            <li><%= role.name %></li>
+        <% }) %>
+    </ul>
+    <h2>Members</h2>
+    <ul>
+        <% members.forEach(member => { %>
+            <li><%= member.user.username %></li>
+        <% }) %>
+    </ul>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="top">
+        <h1>KaliSetup Dashboard</h1>
+        <div class="user-data">
+            <a href="/logout">Logout</a>
+            <a><%= user.username %></a>
+            <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png" alt="User Avatar" width="50" height="50">
+        </div>
+    </div>
+    <div class="inner-body">
+    <ul>
+        <% guilds.forEach(guild => { %>
+            <li class="server">
+                <img src="<%= guild.icon ? `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png` : 'https://via.placeholder.com/50' %>" alt="Server Icon" width="50" height="50">
+                <h3><%= guild.name %></h3>
+                <ul id="guild-<%= guild.id %>-channels"></ul>
+            </li>
+        <% }) %>
+    </ul>
+    <!-- Formulaire d'envoi de message -->
+    <form id="messageForm">
+        <div id="channelIDDisplay">
+            <p>Channel: <%= channelNameClick %></p>
+        </div>
+        <label for="message">Message:</label>
+        <input type="text" id="message" name="message" required>
+        <button type="submit">Send Message</button>
+    </form>
+    </div>
+
+    <script>
+        const guilds = <%- JSON.stringify(guilds) %>;
+        let channelNameClick = <%- JSON.stringify(channelNameClick) %>;
+        let channelIDClick;
+
+        // Fonction pour mettre à jour l'affichage de channelIDClick
+        function updateChannelIDDisplay() {
+            document.getElementById('channelIDDisplay').innerText = `Channel: ${channelNameClick}`;
+        }
+
+        guilds.forEach(guild => {
+            fetch(`/guilds/${guild.id}/channels`)
+                .then(response => response.json())
+                .then(channels => {
+                    const ul = document.getElementById(`guild-${guild.id}-channels`);
+                    channels.forEach(channel => {
+                        if (channel.type === 'category') {
+                            const li = document.createElement('li');
+                            li.classList.add('category');
+                            li.textContent = channel.name;
+
+                            const subUl = document.createElement('ul');
+                            subUl.classList.add('hidden');
+                            subUl.id = `category-${channel.id}-channels`;
+
+                            channel.children.forEach(subChannel => {
+                                const subLi = document.createElement('li');
+                                subLi.classList.add('channel');
+                                subLi.textContent = `${subChannel.name} (${subChannel.type}) -=//=- (id : ${subChannel.id})`;
+                                subLi.addEventListener('click', (event) => {
+                                    event.stopPropagation();
+                                    console.log(`Clicked on sub-channel: ${subChannel.name}`);
+                                    channelNameClick = subChannel.name;
+                                    channelIDClick = subChannel.id;
+                                    updateChannelIDDisplay();
+                                    // Placez ici tout code spécifique aux actions des sous-canaux, par exemple l'envoi de messages
+                                });
+                                    subUl.appendChild(subLi);
+                            });
+
+                            li.appendChild(subUl);
+                            li.addEventListener('click', () => {
+                                subUl.classList.toggle('hidden');
+                            });
+
+                            ul.appendChild(li);
+                        } else {
+                            const li = document.createElement('li');
+                            li.classList.add('channel');
+                            li.textContent = `${channel.name} (${channel.type}) -=//=- (id : ${channel.id})`;
+                            li.addEventListener('click', () => {
+                                channelNameClick = channel.name;
+                                subChannel.id = channel.id;
+                                updateChannelIDDisplay();
+                            });
+                            ul.appendChild(li);
+                        }
+                    });
+                })
+                .catch(console.error);
+        });
+
+        document.getElementById('messageForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const channelId = channelIDClick;
+            const message = document.getElementById('message').value;
+            
+            fetch('/send-message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ channelID: channelId, message }),
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Message sent!');
+                } else {
+                    alert('Error sending message');
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
